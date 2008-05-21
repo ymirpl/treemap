@@ -285,7 +285,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	
 	if (node->right == NULL && node->left == NULL) { // node is leaf
 		ret = ++i;
-		//std::cerr<< "Lisc " <<std::endl;
+		std::cerr<< "Lisc " <<std::endl;
 		if (node->parent->left == node)
 			node->parent->left = NULL;
 		else
@@ -297,20 +297,53 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	}
 	
 	if (node->right!=NULL && node->left != NULL) { // node has two subtrees
-		//std::cerr<< "Dwa poddrze" <<std::endl;
+		std::cerr<< "Dwa poddrze" <<std::endl;
 
-		tmp = (++i).node; // tmp is i's next
+/*		tmp = (++i).node; // tmp is i's next
 		node->data.first = tmp->data.first;
 		node->data.second = tmp->data.second;
 		
 		erase(iterator(tmp)); // tmp has maximum one subtree. Everythig's gonna be alright if we usually erase it
+		return iterator(node);*/
+		
+		tmp = (++i).node; // tmp is i's next
+		if (i != begin()) { // assume we don't delete beginnig
+
+			if (tmp->right != NULL) { // we have to care about tmp's right son
+				if (tmp->parent->right == tmp)
+					tmp->parent->right = tmp->right;
+				else
+					tmp->parent->left = tmp->right;
+
+				tmp->right->parent = tmp->parent;
+			}
+
+			tmp->parent = node->parent;
+			tmp->left = node->left;
+			if (node->right != tmp)
+				tmp->right = node->right;
+			else
+				tmp->right = NULL;
+
+		if (node == node->parent->left) { // node was left son
+				node->parent->left = tmp;
+			} else {
+		//	std::cout << "nodeparentleft " << node->parent->left <<std::endl;
+				node->parent->right = tmp;
+			}
+		} else {
+			assert(0);
+		}
+		
+		delete node;
 		(root->data).first--; // decrease size
-		return iterator(node);
+		return iterator(tmp);
 	}
+		
 	
 	
 	if (node->right != NULL) { // one right subtree
-		//std::cerr<< "jeden prawy" <<std::endl;
+		std::cerr<< "jeden prawy" <<std::endl;
 		ret = ++i; // we return node after delted
 		
 		// we're linking "over" deleted node
@@ -326,7 +359,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		
 		return ret;
 	} else { // node has one left subtree
-		//std::cerr<< "jeden lewy" <<std::endl;
+		std::cerr<< "jeden lewy" <<std::endl;
 		 ret = ++i;
 		
 		 // linking "over" delted node 
@@ -349,11 +382,13 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 // The range is defined by the key values of the first and last iterators
 // first is the first element removed and last is the element just beyond the last elemnt removed.
 // @returns The iterator that designates the first element remaining beyond any elements removed.
-TreeMap::iterator TreeMap::erase(TreeMap::iterator f, TreeMap::iterator l)
-{
-   ///@todo Implement this
-   assert(0);
-   return end();
+TreeMap::iterator TreeMap::erase(TreeMap::iterator f, TreeMap::iterator l) {
+	while (f != l) {
+		std::cout << "Deleting: " << f->first << " " << f->second << std::endl; 
+		std::cout << "Last: " << l->first << " " << l->second << std::endl; 
+		f = erase(f);
+	}
+
 }
 
 // Removes an element from the map.
@@ -524,7 +559,8 @@ void test()
    m[6] = "Weiss";
    m[7] = "Kain";
    m[0] = "Abel";
-   m[7];m[8];m[9];m[1];m[2];m[3];m[4];m[5];m[6];
+   m[9] = "Moses";
+   //m[7];m[8];m[9];m[13];m[14];m[15];m[16];m[187];m[1];m[2];m[3];m[4];m[5];m[6];m[11];m[12];m[13];m[14];m[15];m[16];m[187];m[10];
    
    std::cout<<m[2]<<" "<<m[4]<<std::endl;
    for(iterator=m.begin(); iterator != m.end(); iterator++)
@@ -542,13 +578,17 @@ void test()
    std::cout << "C:  "<<m.count(99)<<std::endl;
    
    TreeMap::iterator eraseIterator = m.begin();
-   eraseIterator++;eraseIterator++;
+   eraseIterator++;eraseIterator++;eraseIterator++;eraseIterator++;eraseIterator++;
    std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
-    m.erase(eraseIterator);
-   
+   m.erase(eraseIterator);
+   TreeMap::iterator shower = eraseIterator;
+   shower++;
+   std::cout << "shower " << shower->first <<"   "<<shower->second<<std::endl;
+
+//	   m.erase(eraseIterator, shower);
    for(iterator=m.begin(); iterator != m.end(); iterator++)
 	   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
-          
+      std::cout << "Size after erase : " << m.size() << std::endl;    
 
     
 
