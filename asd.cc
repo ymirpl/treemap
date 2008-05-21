@@ -299,17 +299,38 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	if (node->right!=NULL && node->left != NULL) { // node has two subtrees
 		std::cerr<< "Dwa poddrze" <<std::endl;
 
-/*		tmp = (++i).node; // tmp is i's next
+		tmp = (++i).node; // tmp is i's next
 		node->data.first = tmp->data.first;
 		node->data.second = tmp->data.second;
 		
-		erase(iterator(tmp)); // tmp has maximum one subtree. Everythig's gonna be alright if we usually erase it
-		return iterator(node);*/
+		if (tmp->right != NULL) { // one right subtree
+			std::cerr<< "jeden prawy u tmp" <<std::endl;
+			ret = ++i; // we return node after delted
+
+			// we're linking "over" deleted tmp
+			if (tmp->parent->right == tmp)
+				tmp->parent->right = tmp->right;
+			else
+				tmp->parent->left = tmp->right;
+
+			tmp->right->parent = tmp->parent;
+		} else { // it's a leaf
+			if (tmp->parent->left == tmp)
+				tmp->parent->left = NULL;
+			else
+				tmp->parent->right = NULL;
+
+
+		}
+		delete tmp;
+		(root->data).first--; // decrease size
+		return iterator(i);
 		
-		tmp = (++i).node; // tmp is i's next
+/*		tmp = (++i).node; // tmp is i's next
 		if (i != begin()) { // assume we don't delete beginnig
 
 			if (tmp->right != NULL) { // we have to care about tmp's right son
+				std::cout << "CARE " << std::endl;
 				if (tmp->parent->right == tmp)
 					tmp->parent->right = tmp->right;
 				else
@@ -319,7 +340,10 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 			}
 
 			tmp->parent = node->parent;
-			tmp->left = node->left;
+			std::cout << "nodeleft " << node->left->data.first << std::endl;
+			std::cout << "tmp " << tmp->data.first << std::endl;
+			std::cout << "nodeparent " << node->parent->data.first << std::endl;
+			//tmp->left = node->left;
 			if (node->right != tmp)
 				tmp->right = node->right;
 			else
@@ -338,6 +362,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		delete node;
 		(root->data).first--; // decrease size
 		return iterator(tmp);
+*/
 	}
 		
 	
@@ -565,13 +590,6 @@ void test()
    std::cout<<m[2]<<" "<<m[4]<<std::endl;
    for(iterator=m.begin(); iterator != m.end(); iterator++)
 	   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
-   
-   for(iterator=m.end(); iterator != m.begin(); iterator--)
-	   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
-   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
-   
-   iterator--;
-   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
    
    std::cout << "Size:  "<<m.size()<<std::endl;
    std::cout << "C:  "<<m.count(7)<<std::endl;
