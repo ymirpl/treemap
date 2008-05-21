@@ -281,12 +281,11 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	   
 	Node* node = i.node; // node is element to delete
 	Node* tmp;
-	//TreeNode *help;
 	TreeMap::iterator ret;
 	
 	if (node->right == NULL && node->left == NULL) { // node is leaf
 		ret = ++i;
-		std::cerr<< "Lisc " <<std::endl;
+		//std::cerr<< "Lisc " <<std::endl;
 		if (node->parent->left == node)
 			node->parent->left = NULL;
 		else
@@ -298,128 +297,52 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	}
 	
 	if (node->right!=NULL && node->left != NULL) { // node has two subtrees
-		std::cerr<< "Dwa poddrze" <<std::endl;
+		//std::cerr<< "Dwa poddrze" <<std::endl;
 
 		tmp = (++i).node; // tmp is i's next
 		node->data.first = tmp->data.first;
 		node->data.second = tmp->data.second;
-		erase(iterator(tmp));
+		
+		erase(iterator(tmp)); // tmp has maximum one subtree. Everythig's gonna be alright if we usually erase it
 		(root->data).first--; // decrease size
 		return iterator(node);
 	}
-	if (node->right != NULL) {
-		std::cerr<< "jeden prawy" <<std::endl;
-		ret = ++i;
-		if(node->parent->right == node) {
-			std::cerr << "parent " <<node->parent->data.first<< std::endl;
-			std::cerr << "node->right " <<node->right->data.first<< std::endl;
-						
-			node->parent->right = node->right;
-		}else
-			node->parent->left = node->right;
+	
+	
+	if (node->right != NULL) { // one right subtree
+		//std::cerr<< "jeden prawy" <<std::endl;
+		ret = ++i; // we return node after delted
 		
+		// we're linking "over" deleted node
+		if (node->parent->right == node)
+			node->parent->right = node->right;
+		else
+			node->parent->left = node->right;
+
 		node->right->parent = node->parent;
+		
 		delete node;
 		(root->data).first--; // decrease size
+		
 		return ret;
-	} else {
-		std::cerr<< "jeden lewy" <<std::endl;
-/*		node->data.first = node->left->data.first;
-		node->data.second = node->left->data.second;
-		erase(iterator(node->left));
-		(root->data).first--; // decrease size
-		return iterator(node);*/
-		ret = ++i;
-		if(node->parent->right == node) {
-			std::cerr << "parent " <<node->parent->data.first<< std::endl;
-			std::cerr << "node->left " <<node->left->data.first<< std::endl;
-						
+	} else { // node has one left subtree
+		//std::cerr<< "jeden lewy" <<std::endl;
+		 ret = ++i;
+		
+		 // linking "over" delted node 
+		if (node->parent->right == node)
 			node->parent->right = node->left;
-		}else
+		else
 			node->parent->left = node->left;
 
-		node->left->parent = node->parent;
+		node->left->parent = node->parent;\
+		
 		delete node;
 		(root->data).first--; // decrease size
 		return ret;
 
 	}
 
-
-	
-		
-/*
-	if (node->right!=NULL) { // node has right subtree
-		tmp = (++i).node; // tmp is i's next
-		std::cerr << "eiter++ " << tmp->data.first << std::endl; 
-
-		if (tmp->right != NULL) { // temp has right son
-			tmp->parent->left = tmp->right; // temps right son becomes his parent left son
-			tmp->right->parent = tmp->parent;
-
-			if (i != begin()) { // we don't delete begin
-				if (node = node->parent->left) {
-					node->parent->left = tmp;
-				} else { // node is right son
-					node->parent->right = tmp;
-				}
-				tmp->parent = node->parent;
-			} else { // i is begin
-				root->left = tmp;
-				tmp->parent = root;
-			}
-			delete node;
-			root->data.first--;
-			return iterator(tmp);
-		}
-	}*/
-		
-/*		tmp = node;
-		help = TreeMapDetail::find_next(tmp);
-		ret = help;
-		TreeMapDetail::zamien(tn, help);
-		// az tn bedzie lisciem
-		while (tn->right!=NULL || tn->left!=NULL) {
-			help = TreeMapDetail::find_next(tmp);
-			TreeMapDetail::zamien(tn, help);
-		}
-		if (tn->parent->left==tn)
-			tn->parent->left = NULL;
-		else
-			tn->parent->right = NULL;
-		delete tn;
-		(root->data).first -= 1;
-		return iterator(ret);
-	}
-	//tn nie ma prawego poddrzewa, ale ma lewe
-	if (tn->left!=NULL) {
-		if (tn->parent->right == tn) { //tn byl prawym dzieckiem, i ma lewe dzieci
-			tn->parent->right = tn->left;
-			tn->left->parent = tn->parent;
-			ret = tn->left;
-			delete tn;
-			return iterator(ret);
-		}
-		tn->parent->left = tn->left;
-		tn->left->parent = tn->parent;
-		ret = tn->left;
-		delete tn;
-		(root->data).first -= 1;
-		return iterator(ret);
-	}
-	// tn jest lisciem
-	tmp = tn;
-	ret = TreeMapDetail::find_next(tmp);
-	if (tn->parent->left==tn) {
-		tn->parent->left = NULL;
-	} else
-		tn->parent->right = NULL;
-	delete tn;
-	(root->data).first -= 1;
-	return iterator(ret);
-}*/
-
-   return end();
 }
 
 // Removes a range of elements from the map.
@@ -601,6 +524,7 @@ void test()
    m[6] = "Weiss";
    m[7] = "Kain";
    m[0] = "Abel";
+   m[7];m[8];m[9];m[1];m[2];m[3];m[4];m[5];m[6];
    
    std::cout<<m[2]<<" "<<m[4]<<std::endl;
    for(iterator=m.begin(); iterator != m.end(); iterator++)
