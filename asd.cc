@@ -128,7 +128,7 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 		}
 	}
 	
-	Node* newNode = new TreeNode(entry, parent); 
+	Node* newNode = new TreeNode(entry, parent, NULL, NULL); 
 	
 	root->data.first++; // increase size counter
 	
@@ -286,14 +286,20 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	
 	if (node->right == NULL && node->left == NULL) { // node is leaf
 		ret = ++i;
-		node->parent->left = NULL;
-		node->parent->right = NULL;
+		std::cerr<< "Lisc " <<std::endl;
+		if (node->parent->left == node)
+			node->parent->left = NULL;
+		else
+			node->parent->right = NULL;
+
 		delete node;
-	    (root->data).first--; // decrease size
-	    return ret;
+		(root->data).first--; // decrease size
+		return ret;
 	}
 	
 	if (node->right!=NULL && node->left != NULL) { // node has two subtrees
+		std::cerr<< "Dwa poddrze" <<std::endl;
+
 		tmp = (++i).node; // tmp is i's next
 		node->data.first = tmp->data.first;
 		node->data.second = tmp->data.second;
@@ -302,17 +308,40 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		return iterator(node);
 	}
 	if (node->right != NULL) {
-		node->data.first = node->right->data.first;
-		node->data.second = node->right->data.second;
-		erase(iterator(node->right));
+		std::cerr<< "jeden prawy" <<std::endl;
+		ret = ++i;
+		if(node->parent->right == node) {
+			std::cerr << "parent " <<node->parent->data.first<< std::endl;
+			std::cerr << "node->right " <<node->right->data.first<< std::endl;
+						
+			node->parent->right = node->right;
+		}else
+			node->parent->left = node->right;
+		
+		node->right->parent = node->parent;
+		delete node;
 		(root->data).first--; // decrease size
-		return iterator(node);
+		return ret;
 	} else {
-		node->data.first = node->left->data.first;
+		std::cerr<< "jeden lewy" <<std::endl;
+/*		node->data.first = node->left->data.first;
 		node->data.second = node->left->data.second;
 		erase(iterator(node->left));
 		(root->data).first--; // decrease size
-		return iterator(node);
+		return iterator(node);*/
+		ret = ++i;
+		if(node->parent->right == node) {
+			std::cerr << "parent " <<node->parent->data.first<< std::endl;
+			std::cerr << "node->left " <<node->left->data.first<< std::endl;
+						
+			node->parent->right = node->left;
+		}else
+			node->parent->left = node->left;
+
+		node->left->parent = node->parent;
+		delete node;
+		(root->data).first--; // decrease size
+		return ret;
 
 	}
 
@@ -569,7 +598,6 @@ void test()
    m[2] = "Merry";
    m[4] = "Jane";
    m[8] = "Korwin";
-   m[4] = "Magdalena";
    m[6] = "Weiss";
    m[7] = "Kain";
    m[0] = "Abel";
@@ -592,8 +620,7 @@ void test()
    TreeMap::iterator eraseIterator = m.begin();
    eraseIterator++;eraseIterator++;
    std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
-   //std::cout << "Eiter++: " << (++eraseIterator)->first  <<std::endl; 
-   m.erase(eraseIterator);
+    m.erase(eraseIterator);
    
    for(iterator=m.begin(); iterator != m.end(); iterator++)
 	   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
