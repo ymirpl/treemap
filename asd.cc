@@ -585,7 +585,7 @@ void test()
    m[7] = "Kain";
    m[0] = "Abel";
    m[9] = "Moses";
-   //m[7];m[8];m[9];m[13];m[14];m[15];m[16];m[187];m[1];m[2];m[3];m[4];m[5];m[6];m[11];m[12];m[13];m[14];m[15];m[16];m[187];m[10];
+   m[7];m[8];m[9];m[13];m[14];m[15];m[16];m[187];m[1];m[2];m[3];m[4];m[5];m[6];m[11];m[12];m[13];m[14];m[15];m[16];m[187];m[10];
    
    std::cout<<m[2]<<" "<<m[4]<<std::endl;
    for(iterator=m.begin(); iterator != m.end(); iterator++)
@@ -596,7 +596,8 @@ void test()
    std::cout << "C:  "<<m.count(99)<<std::endl;
    
    TreeMap::iterator eraseIterator = m.begin();
-   eraseIterator++;eraseIterator++;eraseIterator++;eraseIterator++;eraseIterator++;
+   eraseIterator++;
+
    std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
    m.erase(eraseIterator);
    TreeMap::iterator shower = eraseIterator;
@@ -604,10 +605,15 @@ void test()
    std::cout << "shower " << shower->first <<"   "<<shower->second<<std::endl;
 
 //	   m.erase(eraseIterator, shower);
+   for( int i = 3; i < 17 ; i++) {
+	   std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
+	   m.erase(eraseIterator);
+	   eraseIterator++;
    for(iterator=m.begin(); iterator != m.end(); iterator++)
 	   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
-      std::cout << "Size after erase : " << m.size() << std::endl;    
-
+      std::cout << "Size after erase : " << m.size() << std::endl;
+      
+   }
     
 
    //for_each(m.begin(), m.end(), print );
