@@ -46,19 +46,6 @@ public:
 	friend class TreeMap;
 	typedef std::pair<int,std::string> T;
 
-/*	*
-	 * Method recursively inserting node into tree
-	 
-	static std::pair<TreeNode*, bool> insert(const T& entry, TreeNode* &myRoot) {
-		if (entry.first == myRoot->data.first) { // element with key found
-			return std::make_pair(myRoot, false);
-		}
-		
-		if (entry.first < ) {
-			myRoot = new TreeNode(entry);
-			//return myRoot;
-		}
-	}*/
 protected:
 	/// Stupid example of a method that modifies a protected field in 
 	/// the TreeMap class. Feel free to remove this method or add new
@@ -75,10 +62,11 @@ protected:
 
 /**
  * We have one sentinel in root, which is end, all proper tree is his left son
- * His key value is size
+ * His key value is map size. 
+ * Right sone of the root is pointer to the begin().
  */
 TreeMap::TreeMap() {
-	root = new TreeNode(std::make_pair(0,"__SENTINEL"), NULL, NULL, NULL);
+	root = new TreeNode(std::make_pair(0,"__SENTINEL"));
 }
 
 /// Content of existing TreeMap object is copied into the new object. 
@@ -102,22 +90,33 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 	Node* crawler = root->left; // first significant node
 	Node* parent = root;
 	
+	// Token sais whether we took right son. If so, new element isn't new begin().
+	// Otherwise it is. 
+	bool tokenNewBegin = true; // no right sons taken
+							
+	
 	while (crawler != NULL) {
 		parent = crawler;
 		if (crawler->data.first == entry.first) // element already exists
 			return std::make_pair(iterator(crawler), false);
 		if (entry.first < crawler->data.first)
 			crawler = crawler->left;
-		else
+		else {
 			crawler = crawler->right;
+			tokenNewBegin = false;
+		}
 	}
 	
-	Node* newNode = new TreeNode(entry, parent, NULL, NULL); 
+	Node* newNode = new TreeNode(entry, parent); 
 	
 	root->data.first++; // increase size counter
 	
+	if(tokenNewBegin) { // newNode is new begin()
+		root->right = newNode; 
+	}
+	
 	if (parent == root) {
-		root->left = newNode; // we only link to the left sie of parent
+		root->left = newNode; // we only link to the left sie of root (sentinel)
 		return std::make_pair(iterator(newNode), true);
 	}
 	
@@ -167,7 +166,7 @@ TreeMap::Val& TreeMap::operator[](const Key& k) {
 // Tests if a map is empty.
 bool TreeMap::empty( ) const
 {
-   return root==NULL;
+   return root->left == NULL;
 }
 
 // Returns the number of elements in the map.
@@ -311,17 +310,14 @@ TreeMap& TreeMap::operator=(const TreeMap& )
    return *this;
 }
       
+
 /// Returns an iterator addressing the first element in the map
-TreeMap::iterator TreeMap::begin()
-{ 
-   ///@todo Implement this
-   return iterator(NULL);
+TreeMap::iterator TreeMap::begin() {
+	return iterator(root->right);
 }
 
-TreeMap::const_iterator TreeMap::begin() const
-{ 
-   ///@todo Implement this
-   return iterator(NULL);
+TreeMap::const_iterator TreeMap::begin() const {
+	return iterator(root->right);
 }
 
 /// Returns an iterator that addresses the location succeeding the last element in a map
