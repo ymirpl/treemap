@@ -47,11 +47,30 @@ public:
 	typedef std::pair<int,std::string> T;
 
 protected:
-	/// Stupid example of a method that modifies a protected field in 
-	/// the TreeMap class. Feel free to remove this method or add new
-	/// ones here.
-	static void erase(TreeMap* tm, const TreeMap::Key& k) {
-		tm->root=NULL; // we just modified a protected field in tree map
+
+	/**
+	 * Method finding next element (the most left of right subtree)
+	 */
+	static TreeNode* findNext(TreeNode* node) {
+		
+		if (node->right != NULL) { // right subtree exists
+			node = node->right;
+			while (node->left != NULL)
+				node = node->left; // go to the leftmost node
+			return node;
+		}
+		
+		// No subtree
+		if (node->parent->left == node) { // node is left son
+			return node->parent;
+		}
+		// node is right son
+		
+		//node = node->parent;
+		while (node == node->parent->right) { // go up all right sons
+			node = node->parent;
+		}
+		return node->parent;
 	}
 
 };
@@ -66,7 +85,7 @@ protected:
  * Right sone of the root is pointer to the begin().
  */
 TreeMap::TreeMap() {
-	root = new TreeNode(std::make_pair(0,"__SENTINEL"));
+	root = new TreeNode(std::make_pair(0,"__SENTINEL"), NULL);
 }
 
 /// Content of existing TreeMap object is copied into the new object. 
@@ -164,24 +183,21 @@ TreeMap::Val& TreeMap::operator[](const Key& k) {
 }
 
 // Tests if a map is empty.
-bool TreeMap::empty( ) const
-{
-   return root->left == NULL;
+bool TreeMap::empty() const {
+	return root->left == NULL;
 }
 
 // Returns the number of elements in the map.
-TreeMap::size_type TreeMap::size( ) const
-{
-   ///@todo Implement this
-   assert(0);
-   return 0;
+TreeMap::size_type TreeMap::size() const {
+	return root->data.first;
 }
 
 // Returns the number of elements in a map whose key matches a parameter-specified key.
-TreeMap::size_type TreeMap::count(const Key& _Key) const
-{
-   ///@todo Implement this
-   return 1;  // this is not a multimap
+TreeMap::size_type TreeMap::count(const Key& _Key) const {
+	if (find(_Key) != end())
+		return 1;
+	else
+		return 0;// this is not a multimap
 }
 
 // Removes an element from the map.
@@ -217,7 +233,7 @@ TreeMap::size_type TreeMap::erase(const Key& key)
 // Erases all the elements of a map.
 void TreeMap::clear( )
 {
-   TreeMapDetail::erase(this, 0);  /// Stupid helper usage example
+   //TreeMapDetail::erase(this, 0);  /// Stupid helper usage example
    ///@todo Implement this
    //assert(0);
 }
@@ -239,25 +255,30 @@ bool TreeMap::info_eq(const TreeMap& another) const
 // preincrement
 // Going ot be in-order
 TreeMap::const_iterator& TreeMap::const_iterator::operator ++() {
+
+	if(node->parent == NULL) { // trying to ++end()
+		return *this;
+		std::cerr << " jestem root! " << std::endl;
+	}
+
 	if (node->right != NULL) { // node has right son
 		node = node->right;
-		
+
 		while(node->left != NULL)
-			node = node->left;
-		
+		node = node->left;
+
 		return *this;
 	}
-	
-	if(node->parent == NULL) // trying to ++end()
-		return *this;
 
 	if (node == node->parent->left) { // node is left son
 		node = node->parent;
 		return *this;
 	}
+
 	while (node == node->parent->right) // node is right son
 		node = node->parent;
-	
+	//node = node->parent;
+
 	return *this;
 }
 
@@ -313,25 +334,25 @@ TreeMap& TreeMap::operator=(const TreeMap& )
 
 /// Returns an iterator addressing the first element in the map
 TreeMap::iterator TreeMap::begin() {
+	if (root->left == NULL) // pusta mapa
+		return iterator(root);
 	return iterator(root->right);
 }
 
 TreeMap::const_iterator TreeMap::begin() const {
-	return iterator(root->right);
+	if (root->left == NULL) // pusta mapa
+		return const_iterator(root);
+	return const_iterator(root->right);
 }
 
 /// Returns an iterator that addresses the location succeeding the last element in a map
-TreeMap::iterator TreeMap::end()
-{ 
-   ///@todo Implement this
-   return iterator(NULL);
+TreeMap::iterator TreeMap::end() {
+	return iterator(root);
 }
 
 /// Returns an iterator that addresses the location succeeding the last element in a map
-TreeMap::const_iterator TreeMap::end() const
-{ 
-   ///@todo Implement this
-   return iterator(NULL);
+TreeMap::const_iterator TreeMap::end() const {
+	return const_iterator(root);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -354,9 +375,11 @@ void test()
    //typedef SmallMap<int, std::string> TEST_MAP;
    typedef TreeMap TEST_MAP;
 
+
    std::cout << "Testy uzytkownika" << std::endl;
 
-        TEST_MAP m;  
+        TEST_MAP m;
+        TreeMap::iterator iterator;
    
    m[2] = "Merry";
    m[4] = "Jane";
@@ -364,6 +387,15 @@ void test()
    m[4] = "Magdalena";
    
    std::cout<<m[2]<<" "<<m[4]<<std::endl;
+   //for(iterator=m.begin(); iterator != m.end(); )
+   iterator = m.begin();
+   
+	   std::cerr<<iterator->second<<std::endl;
+	   iterator++; std::cerr<<iterator->second<<std::endl;
+	   iterator++; std::cerr<<iterator->second<<std::endl;
+	   iterator++; std::cerr<<iterator->second<<std::endl;
+	   	    
+	   //std::cout<<iterator->second;
 
    //for_each(m.begin(), m.end(), print );
    //system("PAUSE");
