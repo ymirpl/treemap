@@ -116,8 +116,10 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 	
 	while (crawler != NULL) {
 		parent = crawler;
-		if (crawler->data.first == entry.first) // element already exists
+		if (crawler->data.first == entry.first) {// element already exists
+			std::cerr << "Exists " << crawler << " with parent " << crawler->parent << " w lc : " << crawler->left << " w rc: " << crawler->right << std::endl;
 			return std::make_pair(iterator(crawler), false);
+		}
 		if (entry.first < crawler->data.first)
 			crawler = crawler->left;
 		else {
@@ -136,13 +138,17 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 	
 	if (parent == root) {
 		root->left = newNode; // we only link to the left sie of root (sentinel)
+		std::cerr << "inserted " << newNode << " with Parent root" << std::endl;
 		return std::make_pair(iterator(newNode), true);
+		
 	}
 	
 	if (entry.first < parent->data.first)
 		parent->left = newNode;
 	else
 		parent->right = newNode; // link to the proper side of parent
+	
+	std::cerr << "inserted " << newNode << " with Parent " << newNode->parent << std::endl;
 	
 	return std::make_pair(iterator(newNode), true);
 }
@@ -275,9 +281,11 @@ TreeMap::const_iterator& TreeMap::const_iterator::operator ++() {
 		return *this;
 	}
 
-	while (node == node->parent->right) // node is right son
+	while (node->parent->parent != NULL && node == node->parent->right) { //Node is rright son. p->p == NULL tells root apart.  
+		std::cerr << "jestem prawy "<< std::endl;
 		node = node->parent;
-	//node = node->parent;
+	}
+	node = node->parent;
 
 	return *this;
 }
