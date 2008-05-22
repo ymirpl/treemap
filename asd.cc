@@ -55,7 +55,7 @@ protected:
 		//najpierw podmienimy dzieci
 		TreeNode* tmp;
 		
-		std::cout << "Swappin " << one->data.first << " with: " << two->data.first << std::endl;
+		std::cerr << "Swappin " << one->data.first << " with: " << two->data.first << std::endl;
 
 		tmp = one->left; // swapping left son for two
 		one->left = two->left;
@@ -89,7 +89,21 @@ protected:
 		one->parent = two->parent;
 		two->parent = tmp;
 	}
-
+	
+	/**
+	 * Method recursively deleting all elements
+	 */
+	static void deleteAll(TreeNode* node) {
+		if (node==NULL)
+			return;
+		if (node->left != NULL)
+			deleteAll(node->left);
+		if (node->right != NULL)
+			deleteAll(node->right);
+		
+		std::cerr << "killing : " << node->data.first << std::endl;
+		delete node;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -225,7 +239,7 @@ TreeMap::iterator TreeMap::find(const Key& k) {
 	Node* crawler = root->left; // first significant node
 	Node* parent = root;
 	
-	std::cout << "find given jkey : " << k << std::endl;
+	std::cerr << "find given jkey : " << k << std::endl;
 
 	while (crawler != NULL) {
 		parent = crawler;
@@ -295,15 +309,43 @@ TreeMap::size_type TreeMap::count(const Key& _Key) const {
 // @returns The iterator that designates the first element remaining beyond any elements removed.
 TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 {
+	Node* node;
+	node = i.node; // node is element to delete
+	Node* tmp;
+	TreeMap::iterator ret;
+	int k = i->first;
 	
 
 	   if (i.node == root) // can't delete sentinel
 		return end();
-	   
-	Node* node = i.node; // node is element to delete
-	Node* tmp;
-	TreeMap::iterator ret;
 	
+	 /*
+	   //OKAZUJE SIE ZE NIE MA ZNACZENIA CZY SZUKAM CZY NIE
+	///////////////////////////   
+	Node* crawler = root->left; // first significant node
+	Node* parent = root;
+
+	while (crawler != NULL) {
+		parent = crawler;
+		if (crawler->data.first == k) {// element exists
+			node = crawler;
+		}
+		if (k < crawler->data.first)
+			crawler = crawler->left;
+		else
+			crawler = crawler->right;
+		
+	}
+	
+	if(node != i.node)
+		std::cerr << "WIELKI CHUJ" << std::endl;
+	if(node == root) {
+		std::cerr << "ALE TO END" << std::endl;
+		node = i.node;
+	}
+	///////////////////////////////////////////////
+	*/
+	   
 	if(i == begin()) { //deletion of begin
 		ret = i;
 		ret++;
@@ -313,9 +355,10 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 			root->left = ret.node;
 		
 		root->right = ret.node; // new begin;
-		std::cout << "Deletrig " << node->data.first << " returning: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
+		std::cerr << "Deletrig " << node->data.first << " returning: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
 		
 		delete node;
+		
 		(root->data).first--; // decrease size
 		return ret;
 	}
@@ -350,72 +393,6 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		erase(i); // proper erase
 		return ret;
 		
-
-/*		tmp = (++i).node; // tmp is i's next
-		node->data.first = tmp->data.first;
-		node->data.second = tmp->data.second;
-		
-		if (tmp->right != NULL) { // one right subtree
-			std::cerr<< "jeden prawy u tmp" <<std::endl;
-
-			// we're linking "over" deleted tmp
-			if (tmp->parent->right == tmp)
-				tmp->parent->right = tmp->right;
-			else
-				tmp->parent->left = tmp->right;
-
-			tmp->right->parent = tmp->parent;
-		} else { // it's a leaf
-			if (tmp->parent->left == tmp)
-				tmp->parent->left = NULL;
-			else
-				tmp->parent->right = NULL;
-
-
-		}
-		delete tmp;
-		(root->data).first--; // decrease size
-		std::cerr << "Erasing: " << node->data.first << " ret: " << i.node->data.first << std::endl;
-
-		return i;
-*/		
-/*		tmp = (++i).node; // tmp is i's next
-		if (i != begin()) { // assume we don't delete beginnig
-
-			if (tmp->right != NULL) { // we have to care about tmp's right son
-				std::cout << "CARE " << std::endl;
-				if (tmp->parent->right == tmp)
-					tmp->parent->right = tmp->right;
-				else
-					tmp->parent->left = tmp->right;
-
-				tmp->right->parent = tmp->parent;
-			}
-
-			tmp->parent = node->parent;
-			std::cout << "nodeleft " << node->left->data.first << std::endl;
-			std::cout << "tmp " << tmp->data.first << std::endl;
-			std::cout << "nodeparent " << node->parent->data.first << std::endl;
-			//tmp->left = node->left;
-			if (node->right != tmp)
-				tmp->right = node->right;
-			else
-				tmp->right = NULL;
-
-		if (node == node->parent->left) { // node was left son
-				node->parent->left = tmp;
-			} else {
-		//	std::cout << "nodeparentleft " << node->parent->left <<std::endl;
-				node->parent->right = tmp;
-			}
-		} else {
-			assert(0);
-		}
-		
-		delete node;
-		(root->data).first--; // decrease size
-		return iterator(tmp);
-*/
 	}
 		
 	
@@ -470,8 +447,8 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 // @returns The iterator that designates the first element remaining beyond any elements removed.
 TreeMap::iterator TreeMap::erase(TreeMap::iterator f, TreeMap::iterator l) {
 	while (f != l) {
-		std::cout << "Deleting: " << f->first << " " << f->second << std::endl; 
-		std::cout << "Last: " << l->first << " " << l->second << std::endl; 
+		std::cerr << "Deleting: " << f->first << " " << f->second << std::endl; 
+		std::cerr << "Last: " << l->first << " " << l->second << std::endl; 
 		f = erase(f);
 	}
 
@@ -482,10 +459,10 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator f, TreeMap::iterator l) {
 //          Since this is not a multimap itshould be 1 or 0.
 TreeMap::size_type TreeMap::erase(const Key& key)
 {
-	std::cout << "Given key: " << key << std::endl;
+	std::cerr << "Given key: " << key << std::endl;
 	TreeMap::iterator iter;
 	iter = find(key);
-	std::cout << "Iter sec: " << iter->second << std::endl;
+	std::cerr << "Iter sec: " << iter->second << std::endl;
 	if(iter != end())  {// key exists
 		erase(iter);
 		return 1;
@@ -494,11 +471,11 @@ TreeMap::size_type TreeMap::erase(const Key& key)
 }
 
 // Erases all the elements of a map.
-void TreeMap::clear( )
-{
-   //TreeMapDetail::erase(this, 0);  /// Stupid helper usage example
-   ///@todo Implement this
-   //assert(0);
+void TreeMap::clear() {
+	(root->data).first = 0;
+	root->right = root; // begin = end
+	root->left = NULL;
+	TreeMapDetail::deleteAll(root->left);
 }
 
 bool TreeMap::struct_eq(const TreeMap& another) const
@@ -639,7 +616,7 @@ TreeMap::const_iterator TreeMap::end() const {
 /// A helper function that outputs a key-value pair.
 void print(const std::pair<int, std::string>& p)
 {
-   std::cout<<p.first<<", "<<p.second<<std::endl;
+   std::cerr<<p.first<<", "<<p.second<<std::endl;
 }
 
 #include <map>
@@ -653,7 +630,7 @@ void test()
    typedef TreeMap TEST_MAP;
 
 
-   std::cout << "Testy uzytkownika" << std::endl;
+   std::cerr << "Testy uzytkownika" << std::endl;
 
         TEST_MAP m;
         TreeMap::iterator iterator;
@@ -665,37 +642,65 @@ void test()
    m[7] = "Kain";
    m[0] = "Abel";
    m[9] = "Moses";
-   m[7];m[8];m[9];m[13];m[14];m[15];m[16];m[187];m[1];m[2];m[3];m[4];m[5];m[6];m[11];m[12];m[13];m[14];m[15];m[16];m[187];m[10];
-
+   m[20];m[100];m[19];m[23];m[21];m[40];m[22];m[33];m[18];m[60];m[12];m[80];
    m.draw();
    
    TreeMap::iterator eraseIterator = m.begin();
    
+   TreeMap::iterator i;
+   
+   
    eraseIterator++;
    std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
    TreeMap::iterator ender = eraseIterator;
-   ender++;ender++;
+   ender++;ender++;ender++;ender++;ender++;ender++;
    std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
    std::cout << "Ender: " << ender->first  <<std::endl;
          
    m.erase(eraseIterator, ender);
    m.draw();
+
+   for(i = m.end(); i != m.begin(); --i)
+	   std::cout << i->first << " " << i->second << std::endl;
+   std::cout << i->first << " " << i->second << std::endl;
    std::cout << "Size after erase : " << m.size() << std::endl;
    
+
+   
+   m.clear();
+   std::cout << "CLEAR! " << std::endl;
+   m.draw();
+   std::cout << "CLEAR" << std::endl;
+   for(i = m.end(); i != m.begin(); --i)
+	   std::cout << i->first << " " << i->second << std::endl;
+   std::cout << i->first << " " << i->second << std::endl;
+   std::cout << "Size after erase : " << m.size() << std::endl;
+
+   
+   m[2] = "Merry";
+   m[4] = "Jane";
+   m[8] = "Korwin";
+   m[6] = "Weiss";
+   m[7] = "Kain";
+   m[0] = "Abel";
+   m[9] = "Moses";
+   m[20];m[100];m[19];m[23];m[21];m[40];m[22];m[33];m[18];m[60];m[12];m[80];
+   m.draw();
+   std::cout << "Size after insert : " << m.size() << std::endl;
    
 
 
 //	   m.erase(eraseIterator, shower);
-  /* for( int i = 3; i < 17 ; i++) {
+/*   for( int i = 3; i < 17 ; i++) {
 
 	   //eraseIterator = m.begin();
 	   //for(int j =0; j < 17-i ; j++ {
 	   eraseIterator++;
 	   //}
-	  std::cout << "Eiter: " << eraseIterator->first  << " " << eraseIterator->second << std::endl;
+	  std::cerr << "Eiter: " << eraseIterator->first  << " " << eraseIterator->second << std::endl;
 	 m.erase(eraseIterator);
 	   m.draw();
-	  std::cout << "Size after erase : " << m.size() << std::endl;
+	  std::cerr << "Size after erase : " << m.size() << std::endl;
       
 
 		   
@@ -712,7 +717,7 @@ void test()
 
 //int main()
 //{
-//   std::cout << "AISDI cwiczenie 4: wchodze do funkcji main." << std::endl;
+//   std::cerr << "AISDI cwiczenie 4: wchodze do funkcji main." << std::endl;
 //   test();
 //   // Biblioteka z bardziej rygorystyczna wersja tych testow bedzie udostepniona na nastepnych zajeciach.
 //   Test2();
