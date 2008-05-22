@@ -263,5 +263,8 @@ public:
    
    /// Assignment operator copy the source elements into this object.
    TreeMap& operator=(const TreeMap& );
+   
+   void draw();
+   
 };
 

@@ -49,28 +49,45 @@ public:
 protected:
 
 	/**
-	 * Method finding next element (the most left of right subtree)
+	 * Method swapping two elements
 	 */
-	static TreeNode* findNext(TreeNode* node) {
+	static void swap(TreeNode *one, TreeNode *two) {
+		//najpierw podmienimy dzieci
+		TreeNode* tmp;
 		
-		if (node->right != NULL) { // right subtree exists
-			node = node->right;
-			while (node->left != NULL)
-				node = node->left; // go to the leftmost node
-			return node;
-		}
+		std::cout << "Swappin " << one->data.first << " with: " << two->data.first << std::endl;
+
+		tmp = one->left; // swapping left son for two
+		one->left = two->left;
+		if (two->left!=NULL)
+			two->left->parent = one; 
 		
-		// No subtree
-		if (node->parent->left == node) { // node is left son
-			return node->parent;
-		}
-		// node is right son
+		two->left = tmp; // for one
+		if (tmp!=NULL)
+			tmp->parent = two;
+
+		tmp = one->right; // right sons
+		one->right = two->right;
+		if (two->right!=NULL)
+			two->right->parent = one;
+		two->right = tmp;
+		if (tmp!=NULL)
+			tmp->parent = two;
+
+		//swapping parents
+		if (one->parent->left == one)
+			one->parent->left = two;
+		else
+			one->parent->right = two;
 		
-		//node = node->parent;
-		while (node == node->parent->right) { // go up all right sons
-			node = node->parent;
-		}
-		return node->parent;
+		if (two->parent->left == two)
+			two->parent->left = one;
+		else
+			two->parent->right = one;
+		
+		tmp = one->parent;
+		one->parent = two->parent;
+		two->parent = tmp;
 	}
 
 };
@@ -293,19 +310,24 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 
 		delete node;
 		(root->data).first--; // decrease size
+		std::cerr << "Erasing: " << node->data.first << " ret: " << ret.node->data.first << std::endl;
 		return ret;
 	}
 	
 	if (node->right!=NULL && node->left != NULL) { // node has two subtrees
-		std::cerr<< "Dwa poddrze" <<std::endl;
+		std::cerr<< "Dwa poddrze swap" <<std::endl;
+		TreeMap::iterator sec = i;
+		sec++;
+		TreeMapDetail::swap(i.node, sec.node );
+		return i;
+		
 
-		tmp = (++i).node; // tmp is i's next
+/*		tmp = (++i).node; // tmp is i's next
 		node->data.first = tmp->data.first;
 		node->data.second = tmp->data.second;
 		
 		if (tmp->right != NULL) { // one right subtree
 			std::cerr<< "jeden prawy u tmp" <<std::endl;
-			ret = ++i; // we return node after delted
 
 			// we're linking "over" deleted tmp
 			if (tmp->parent->right == tmp)
@@ -324,8 +346,10 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		}
 		delete tmp;
 		(root->data).first--; // decrease size
-		return iterator(i);
-		
+		std::cerr << "Erasing: " << node->data.first << " ret: " << i.node->data.first << std::endl;
+
+		return i;
+*/		
 /*		tmp = (++i).node; // tmp is i's next
 		if (i != begin()) { // assume we don't delete beginnig
 
@@ -382,6 +406,8 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		delete node;
 		(root->data).first--; // decrease size
 		
+		std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << std::endl;
+
 		return ret;
 	} else { // node has one left subtree
 		std::cerr<< "jeden lewy" <<std::endl;
@@ -397,6 +423,8 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		
 		delete node;
 		(root->data).first--; // decrease size
+		std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << std::endl;
+
 		return ret;
 
 	}
@@ -536,6 +564,20 @@ TreeMap::iterator TreeMap::begin() {
 	return iterator(root->right);
 }
 
+void TreeMap::draw() {
+	TreeMap::iterator i = begin();
+	for(;i!=end();i++) {
+		std::cout <<  i->first <<" p: " << i.node->parent->data.first << std::endl;
+
+		if(i.node->left != NULL)
+			std::cout << " w l: " << i.node->left->data.first << std::endl;
+		if(i.node->right != NULL)
+			std::cout<< " r: "<<i.node->right->data.first << std::endl;
+		
+		std::cout<< " --- " <<std::endl;
+	}
+}
+
 TreeMap::const_iterator TreeMap::begin() const {
 	if (root->left == NULL) // pusta mapa
 		return const_iterator(root);
@@ -551,6 +593,8 @@ TreeMap::iterator TreeMap::end() {
 TreeMap::const_iterator TreeMap::end() const {
 	return const_iterator(root);
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Tests
@@ -586,36 +630,28 @@ void test()
    m[0] = "Abel";
    m[9] = "Moses";
    m[7];m[8];m[9];m[13];m[14];m[15];m[16];m[187];m[1];m[2];m[3];m[4];m[5];m[6];m[11];m[12];m[13];m[14];m[15];m[16];m[187];m[10];
-   
-   std::cout<<m[2]<<" "<<m[4]<<std::endl;
-   for(iterator=m.begin(); iterator != m.end(); iterator++)
-	   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
-   
-   std::cout << "Size:  "<<m.size()<<std::endl;
-   std::cout << "C:  "<<m.count(7)<<std::endl;
-   std::cout << "C:  "<<m.count(99)<<std::endl;
+
+   m.draw();
    
    TreeMap::iterator eraseIterator = m.begin();
    eraseIterator++;
 
    std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
    m.erase(eraseIterator);
-   TreeMap::iterator shower = eraseIterator;
-   shower++;
-   std::cout << "shower " << shower->first <<"   "<<shower->second<<std::endl;
+   m.draw();
+
 
 //	   m.erase(eraseIterator, shower);
    for( int i = 3; i < 17 ; i++) {
 
 	   eraseIterator = m.begin();
 	   for(int j =0; j < 17-i ; j++) {
-		   eraseIterator++; 
+	   eraseIterator++;
 	   }
 	   std::cout << "Eiter: " << eraseIterator->first  << " " << eraseIterator->second << std::endl;
 	   m.erase(eraseIterator);
-   for(iterator=m.begin(); iterator != m.end(); iterator++)
-	   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
-      std::cout << "Size after erase : " << m.size() << std::endl;
+	   m.draw();
+	   std::cout << "Size after erase : " << m.size() << std::endl;
       
    }
     
