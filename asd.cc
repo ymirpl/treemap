@@ -294,7 +294,7 @@ TreeMap::iterator TreeMap::unsafe_insert(const std::pair<Key, Val>& entry)
 {
 	///@todo Finnish this
 	TreeNode * node = root->left;
-	while ( node != NULL )
+/*	while ( node != NULL )
 	{
 		if (node->data.first > entry.first)
 		{
@@ -322,6 +322,41 @@ TreeMap::iterator TreeMap::unsafe_insert(const std::pair<Key, Val>& entry)
 	++detail->size;
 	root->left = new TreeNode(entry, root);
 	return iterator(root->left);
+	*/
+	
+	Node* crawler = root->left; // first significant node
+	Node* parent = root;
+	
+	// Token sais whether we took right son. If so, new element isn't new begin().
+	// Otherwise it is. 
+	while (crawler != NULL) {
+		parent = crawler;
+		if (entry.first < crawler->data.first)
+			crawler = crawler->left;
+		else 
+			crawler = crawler->right;
+	}
+	
+	Node* newNode = new TreeNode(entry, parent); 
+	
+	++(detail->size); // increase size counter
+	
+	
+	if (parent == root) {
+		root->left = newNode; // we only link to the left sie of root (sentinel)
+		std::cerr << "inserted " << newNode << " with Parent root" << std::endl;
+		return iterator(newNode);
+		
+	}
+	
+	if (entry.first <= parent->data.first)
+		parent->left = newNode;
+	else
+		parent->right = newNode; // link to the proper side of parent
+	
+	std::cerr << "inserted " << newNode << " with Parent " << newNode->parent << std::endl;
+	
+	return iterator(newNode);
 }
 
 // Returns an iterator addressing the location of the entry in the map
