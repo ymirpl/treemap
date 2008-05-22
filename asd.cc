@@ -47,15 +47,7 @@ protected:
 	friend class TreeMap::const_iterator;
 	unsigned int size; // TreeSize
 
-	/// Stupid example of a method that modifies a protected field in 
-	/// the TreeMap class. Feel free to remove this method or add new
-	/// ones here.
-	//static void erase(TreeMap* tm, const TreeMap::Key& k)
-	//{
-	//	tm->root=NULL; // we just modified a protected field in tree map
-	//}
-
-	// returns next element with key k (iterative)
+	// BST search
 	static TreeNode* treeSearch(TreeNode* node, const TreeMap::Key& k)
 	{
 		while (node != NULL && node->data.first != k)
@@ -67,19 +59,12 @@ protected:
 		}
 		return node;
 	}
-	// returns next element in inorder traverse
+	
+	
+	// returns next element (inorder)
 	static TreeNode* pred(TreeNode* node) {
 		assert(node != NULL);
-		/*	TreeNode * tmp = node;
-		 if (tmp -> left != NULL)
-		 return TreeMapDetail::treeMaximum(tmp->left);
-		 TreeNode * y = tmp->parent;
-		 while (y != NULL && tmp == y->left)
-		 {
-		 tmp = y;
-		 y = y->parent;
-		 }
-		 return y; */
+
 		if (node->left != NULL) {// node has left son. Seek for the rightmost son of left subtree
 			node = node->left;
 			while (node->right != NULL)
@@ -99,20 +84,11 @@ protected:
 
 		return node;
 	}
+	
 	// returns next element in inorder traverse
 	static TreeNode* succ(TreeNode* node)
 	{
 		assert(node != NULL);
-		/*TreeNode * tmp = node;
-		if (tmp->right != NULL)
-			return TreeMapDetail::treeMinimum(tmp->right);
-		TreeNode * y = tmp->parent;
-		while (y != NULL && tmp == y->right)
-		{
-			tmp = y;
-			y = y->parent;
-		}
-		return y; */
 
 		if (node->parent == NULL) { // trying to ++end()
 			return node;
@@ -139,6 +115,7 @@ protected:
 
 		return node;
 	}
+	
 	// returns the rightmost tree element
 	static TreeNode* treeMinimum(TreeNode* node) {
 		if (node == NULL)
@@ -147,15 +124,8 @@ protected:
 			node = node->left;
 		return node;
 	}
-	// returns the leftmost tree element
-	static TreeNode* treeMaximum(TreeNode* node) {
-		if (node == NULL)
-			return NULL;
-		while (node->right != NULL)
-			node = node->right;
-		return node;
-	}
-	// recursive delete tree
+
+	// recursively delete tree
 	static void deleteAll(TreeNode* node) {
 		if (node == NULL)
 			return;
@@ -165,6 +135,8 @@ protected:
 			deleteAll(node->right);
 		delete node;
 	}
+	
+	// rocursively copy tree
 	static TreeNode* copyAll(TreeNode* node, TreeNode* parent) {
 		if (node == NULL)
 			return NULL;
@@ -181,7 +153,7 @@ protected:
 		//najpierw podmienimy dzieci
 		TreeNode* tmp;
 		
-		std::cerr << "Swappin " << one->data.first << " with: " << two->data.first << std::endl;
+		//std::cerr << "Swappin " << one->data.first << " with: " << two->data.first << std::endl;
 
 		tmp = one->left; // swapping left son for two
 		one->left = two->left;
@@ -256,44 +228,7 @@ TreeMap::~TreeMap() {
 std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& entry)
 {
 	///@todo Finnish this (Poor Finnish people)
-/*	TreeNode* node = root->left;
-	if (node == NULL)
-	{
-		root->left = new TreeNode(entry, root);
-		++detail->size;
-		return std::make_pair(iterator(root->left), true);
-	}
-	while (/* node != NULL && *///node->data.first != entry.first )
-/*	{
-		if (node->data.first > entry.first)
-		{
-			if (node->left == NULL)
-			{
-				node->left = new TreeNode(entry, node);
-				++detail->size;
-				return std::make_pair(iterator(node->left), true);
-			}
-			else
-				node = node->left;
-		}
-		else
-		{
-			if (node->right == NULL)
-			{
-				node->right = new TreeNode(entry, node);
-				++detail->size;
-				return std::make_pair(iterator(node->right), true);
-			}
-			else
-				node = node->right;
-		}
-	}
-	//if (node->data.first == entry.first)
-		return std::make_pair(iterator(node), false);
 
-	// shouldn't happen
-	//return std::make_pair(unsafe_insert(entry), true);
-*/
 	Node* crawler = root->left; // first significant node
 	Node* parent = root;
 	
@@ -313,10 +248,7 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 	(detail->size)++; // increase size counter
 	
 	if (parent == root) {
-		root->left = newNode; // we only link to the left sie of root (sentinel)
-		std::cerr << "inserted " << newNode << " with Parent root" << std::endl;
-		return std::make_pair(iterator(newNode), true);
-		
+		root->left = newNode; // we only link to the left sie of root (sentinel)	
 	}
 	
 	if (entry.first <= parent->data.first)
@@ -324,7 +256,7 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 	else
 		parent->right = newNode; // link to the proper side of parent
 	
-	std::cerr << "inserted " << newNode << " with Parent " << newNode->parent << std::endl;
+//	std::cerr << "inserted " << newNode << " with Parent " << newNode->parent << std::endl;
 	
 	return std::make_pair(iterator(newNode), true);
 }
@@ -334,37 +266,8 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 // such a key in the map.
 TreeMap::iterator TreeMap::unsafe_insert(const std::pair<Key, Val>& entry)
 {
-	///@todo Finnish this
-	TreeNode * node = root->left;
-/*	while ( node != NULL )
-	{
-		if (node->data.first > entry.first)
-		{
-			if (node->left == NULL)
-			{
-				node->left = new TreeNode(entry, node);
-				++detail->size;
-				return iterator(node->left);
-			}
-			else
-				node = node->left;
-		}
-		else
-		{
-			if (node->right == NULL)
-			{
-				node->right = new TreeNode(entry, node);
-				++detail->size;
-				return iterator(node->right);
-			}
-			else
-				node = node->right;
-		}
-	}
-	++detail->size;
-	root->left = new TreeNode(entry, root);
-	return iterator(root->left);
-	*/
+	///@todo Finnish this (Finnish HIM! :))
+
 	
 	Node* crawler = root->left; // first significant node
 	Node* parent = root;
@@ -386,7 +289,7 @@ TreeMap::iterator TreeMap::unsafe_insert(const std::pair<Key, Val>& entry)
 	
 	if (parent == root) {
 		root->left = newNode; // we only link to the left sie of root (sentinel)
-		std::cerr << "inserted " << newNode << " with Parent root" << std::endl;
+	//	std::cerr << "inserted " << newNode << " with Parent root" << std::endl;
 		return iterator(newNode);
 		
 	}
@@ -396,7 +299,7 @@ TreeMap::iterator TreeMap::unsafe_insert(const std::pair<Key, Val>& entry)
 	else
 		parent->right = newNode; // link to the proper side of parent
 	
-	std::cerr << "inserted " << newNode << " with Parent " << newNode->parent << std::endl;
+	//std::cerr << "inserted " << newNode << " with Parent " << newNode->parent << std::endl;
 	
 	return iterator(newNode);
 }
@@ -440,7 +343,6 @@ TreeMap::size_type TreeMap::size() const {
 
 // Returns the number of elements in a map whose key matches a parameter-specified key.
 TreeMap::size_type TreeMap::count(const Key& _Key) const {
-	///@todo Implement this
 	return find(_Key) != end() ? 1 : 0; // this is not a multimap
 }
 
@@ -448,64 +350,6 @@ TreeMap::size_type TreeMap::count(const Key& _Key) const {
 // @returns The iterator that designates the first element remaining beyond any elements removed.
 TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 {
-	/*TreeNode * node = i.node;
-	assert(node != root);
-
-	TreeNode * y;
-	TreeNode * x;
-	TreeNode * ret = TreeMapDetail::succ(node);
-	if (node->left == NULL || node->right == NULL)
-		y = node;
-	else
-		y = ret;
-
-	if (y->left != NULL)
-		x = y->left;
-	else
-		x = y->right;
-
-	if (x != NULL)
-	{
-		x->parent = y->parent;
-	}
-	if (y == root->left)
-	{
-		root->left = x;
-		if (x != NULL)
-			x->parent = root;
-	}
-	else
-	{
-		if (y == y->parent->left)
-		{
-			y->parent->left = x;
-		}
-		else
-			y->parent->right = x;
-	}
-	if (y != node)
-	{
-		// przepinamy y w miejsce node
-		if (node->parent->left == node)
-			node->parent->left = y;
-		else
-			node->parent->right = y;
-		y->parent = node->parent;
-		y->left = node->left;
-		if (y->left != NULL)
-			y->left->parent = y;
-		y->right = node->right;
-		if (y->right != NULL)
-			y->right->parent = y;
-		x = y;
-	}
-	else
-	{
-		x = ret;
-	}
-	delete node;
-	--detail->size;
-	return iterator(x);*/
 	
 	Node* node;
 	node = i.node; // node is element to delete
@@ -520,8 +364,8 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		ret = i;
 		ret++;
 		
-		std::cerr<< "Lisc " <<std::endl;
-		std::cerr << "Erasing: " << node->data.first << " ret: " << ret.node->data.first <<  "  " << ret.node->data.second << std::endl;
+		//std::cerr<< "Lisc " <<std::endl;
+		//std::cerr << "Erasing: " << node->data.first << " ret: " << ret.node->data.first <<  "  " << ret.node->data.second << std::endl;
 				
 		if (node->parent->left == node)
 			node->parent->left = NULL;
@@ -535,13 +379,13 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	}
 	
 	if (node->right!=NULL && node->left != NULL) { // node has two subtrees
-		std::cerr<< "Dwa poddrze swap" <<std::endl;
+		//std::cerr<< "Dwa poddrze swap" <<std::endl;
 		
 		TreeMap::iterator ret = i;
 		ret++;
 		
 		TreeMapDetail::swap(i.node, ret.node );
-		std::cerr << "Erasing: " << node->data.first << " ret: " << ret.node->data.first <<  "  " << ret.node->data.second << std::endl;
+		//std::cerr << "Erasing: " << node->data.first << " ret: " << ret.node->data.first <<  "  " << ret.node->data.second << std::endl;
 		
 		erase(i); // proper erase
 		return ret;
@@ -551,7 +395,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	
 	
 	if (node->right != NULL) { // one right subtree
-		std::cerr<< "jeden prawy" <<std::endl;
+		//std::cerr<< "jeden prawy" <<std::endl;
 		ret = i; // we return node after delted
 		ret++;
 		
@@ -564,13 +408,13 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		node->right->parent = node->parent;
 		
 		
-		std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
+		//std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
 
 		delete node;
 		(detail->size)--; // decrease size
 		return ret;
 	} else { // node has one left subtree
-		std::cerr<< "jeden lewy" <<std::endl;
+		//std::cerr<< "jeden lewy" <<std::endl;
 		 ret = i;
 		 ret++;
 		
@@ -581,7 +425,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 			node->parent->left = node->left;
 
 		node->left->parent = node->parent;
-		std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
+		//std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
 
 		
 		delete node;
@@ -599,7 +443,6 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 // @returns The iterator that designates the first element remaining beyond any elements removed.
 TreeMap::iterator TreeMap::erase(TreeMap::iterator f, TreeMap::iterator l)
 {
-	///@todo Implement this
 	assert(f.node->data.first <= l.node->data.first); // sentinel (end) is INT_MAX so this assert is ok
 	while (f != l)
 	{
@@ -611,35 +454,29 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator f, TreeMap::iterator l)
 // Removes an element from the map.
 // @returns The number of elements that have been removed from the map.
 //			 Since this is not a multimap itshould be 1 or 0.
-TreeMap::size_type TreeMap::erase(const Key& key)
-{
-	///@todo Implement this
+TreeMap::size_type TreeMap::erase(const Key& key) {
 	iterator i = find(key);
-	if (i == end()) return 0; // nie znaleziono
+	
+	if (i == end())
+		return 0; // not found
+	
 	erase(i);
 	return 1;
 }
 
 // Erases all the elements of a map.
-void TreeMap::clear( )
-{
-	//TreeMapDetail::erase(this, 0);  /// Stupid helper usage example
-	///@todo Implement this
+void TreeMap::clear() {
 	TreeMapDetail::deleteAll(root->left);
 	root->left = NULL;
 	detail->size = 0;
 }
 
-bool TreeMap::struct_eq(const TreeMap& another) const
-{
-	///@todo Implement this
+bool TreeMap::struct_eq(const TreeMap& another) const {
 	if (size() != another.size())
 		return false;
 
-	for (iterator i = another.begin(), j = begin(); j != end(); ++i, ++j)
-	{
-		if (*i != *j)
-		{
+	for (iterator i = another.begin(), j = begin(); j != end(); ++i, ++j) {
+		if (*i != *j) {
 			return false;
 		}
 	}
@@ -647,16 +484,12 @@ bool TreeMap::struct_eq(const TreeMap& another) const
 	return true;
 }
 
-bool TreeMap::info_eq(const TreeMap& another) const
-{
-	///@todo Implement this
+bool TreeMap::info_eq(const TreeMap& another) const {
 	if (size() != another.size())
 		return false;
 
-	for (iterator i = another.begin(); i != another.end(); ++i)
-	{
-		if (find(i->first) == end())
-		{
+	for (iterator i = another.begin(); i != another.end(); ++i) {
+		if (find(i->first) == end()) {
 			return false;
 		}
 	}
@@ -665,86 +498,68 @@ bool TreeMap::info_eq(const TreeMap& another) const
 }
 
 // preincrement
-TreeMap::const_iterator& TreeMap::const_iterator::operator ++()
-{
-	///@todo Implement this
-	assert(node->parent != NULL);
+TreeMap::const_iterator& TreeMap::const_iterator::operator ++() {
 	node = TreeMapDetail::succ(node);
 	return *this;
 }
 
 // postincrement
-TreeMap::const_iterator TreeMap::const_iterator::operator++(int)
-{
-	///@todo Implement this
-	assert(node->parent != NULL);
+TreeMap::const_iterator TreeMap::const_iterator::operator++(int) {
 	const_iterator tmp = *this;
 	node = TreeMapDetail::succ(node);
 	return tmp;
 }
 
 // predecrement
-TreeMap::const_iterator& TreeMap::const_iterator::operator--()
-{
-	///@todo Implement this
+TreeMap::const_iterator& TreeMap::const_iterator::operator--() {
 	TreeNode * t = TreeMapDetail::pred(node);
-	assert(t != NULL);	// zapobiega przejsciu przed pierwszy element
+	//assert(t != NULL);
 	node = t;
 	return *this;
 }
 
 // postdecrement
-TreeMap::const_iterator TreeMap::const_iterator::operator--(int)
-{
-	///@todo Implement this
+TreeMap::const_iterator TreeMap::const_iterator::operator--(int){
+
 	const_iterator tmp = *this;
 	TreeNode * t = TreeMapDetail::pred(node);
-	assert(t != NULL);	// zapobiega przejsciu przed pierwszy element
+	//assert(t != NULL);
 	node = t;
 	return tmp;
 }
 
 
 /// Assignment operator copy the source elements into this object.
-TreeMap& TreeMap::operator=(const TreeMap& another)
-{
-	///@todo Implement this
+TreeMap& TreeMap::operator=(const TreeMap& another) {
 	clear();
 	root->left = TreeMapDetail::copyAll(another.root->left, root);
-	detail->size = another.detail->size; // tree size ;-)
+	detail->size = another.detail->size; 
 	return *this;
 }
 		
+
 /// Returns an iterator addressing the first element in the map
-TreeMap::iterator TreeMap::begin()
-{ 
-	///@todo Implement this
+TreeMap::iterator TreeMap::begin() {
 	return iterator(TreeMapDetail::treeMinimum(root));
 }
 
-TreeMap::const_iterator TreeMap::begin() const
-{ 
-	///@todo Implement this
-	return iterator(TreeMapDetail::treeMinimum(root));
+TreeMap::const_iterator TreeMap::begin() const {
+	return const_iterator(TreeMapDetail::treeMinimum(root));
 }
 
 /// Returns an iterator that addresses the location succeeding the last element in a map
-TreeMap::iterator TreeMap::end()
-{ 
-	///@todo Implement this
+TreeMap::iterator TreeMap::end() {
 	return iterator(root);
 }
 
 /// Returns an iterator that addresses the location succeeding the last element in a map
-TreeMap::const_iterator TreeMap::end() const
-{ 
-	///@todo Implement this
-	return iterator(root);
+TreeMap::const_iterator TreeMap::end() const {
+	return const_iterator(root);
 }
 
 void test()
 {
-	
+/*	
 	   // A typedef used by the test.
 	   //typedef std::map<int, std::string> TEST_MAP;
 	   //typedef SmallMap<int, std::string> TEST_MAP;
@@ -787,7 +602,7 @@ void test()
 	   std::cout << " beg : " <<  (m.begin())->first << " " << (m.begin())->second << std::endl;
 	   std::cout << " end : " << (m.end())->first << " " << (m.end())->second << std::endl;
 	   std::cout << " count[201] " << m.count(201) << std::endl;
-	   m.erase(m.begin(), m.end());
+	   m.erase(m.begin(), m.end());*/
 }
 
 //////////////////////////////////////////////////////////////////////////////
