@@ -296,13 +296,29 @@ TreeMap::size_type TreeMap::count(const Key& _Key) const {
 TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 {
 	
-	assert(i!=begin());
+
 	   if (i.node == root) // can't delete sentinel
 		return end();
 	   
 	Node* node = i.node; // node is element to delete
 	Node* tmp;
 	TreeMap::iterator ret;
+	
+	if(i == begin()) { //deletion of begin
+		ret = i;
+		ret++;
+		if(node->parent != root)
+			node->parent->left = NULL; // node is left leaf
+		else
+			root->left = ret.node;
+		
+		root->right = ret.node; // new begin;
+		std::cout << "New begin is " << ret.node->data.first << " w P: " << ret.node->parent->data.second << std::endl;
+		
+		delete node;
+		(root->data).first--; // decrease size
+		return ret;
+	}
 	
 	if (node->right == NULL && node->left == NULL) { // node is leaf
 		ret = ++i;
@@ -460,7 +476,7 @@ TreeMap::size_type TreeMap::erase(const Key& key)
 	TreeMap::iterator iter;
 	iter = find(key);
 	std::cout << "Iter sec: " << iter->second << std::endl;
-	if(iter != end())  {// no such key
+	if(iter != end())  {// key exists
 		erase(iter);
 		return 1;
 	}
@@ -654,10 +670,10 @@ void test()
 //	   m.erase(eraseIterator, shower);
    for( int i = 3; i < 17 ; i++) {
 
-	   eraseIterator = m.begin();
-	   for(int j =0; j < 17-i ; j++) {
+	   //eraseIterator = m.begin();
+	   //for(int j =0; j < 17-i ; j++ {
 	   eraseIterator++;
-	   }
+	   //}
 	   std::cout << "Eiter: " << eraseIterator->first  << " " << eraseIterator->second << std::endl;
 	   m.erase(eraseIterator);
 	   m.draw();
