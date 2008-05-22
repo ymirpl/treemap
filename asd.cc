@@ -68,7 +68,7 @@ protected:
 		return node;
 	}
 	// returns next element in inorder traverse
-	static TreeNode * pred(TreeNode * node) {
+	static TreeNode* pred(TreeNode* node) {
 		assert(node != NULL);
 		/*	TreeNode * tmp = node;
 		 if (tmp -> left != NULL)
@@ -100,7 +100,7 @@ protected:
 		return node;
 	}
 	// returns next element in inorder traverse
-	static TreeNode * succ(TreeNode * node)
+	static TreeNode* succ(TreeNode* node)
 	{
 		assert(node != NULL);
 		/*TreeNode * tmp = node;
@@ -139,34 +139,38 @@ protected:
 
 		return node;
 	}
-	// returns most right tree element
-	static TreeNode * treeMinimum(TreeNode * node)
-	{
-		if (node == NULL) return NULL;
-		while (node->left != NULL) node = node->left;
+	// returns the rightmost tree element
+	static TreeNode* treeMinimum(TreeNode* node) {
+		if (node == NULL)
+			return NULL;
+		while (node->left != NULL)
+			node = node->left;
 		return node;
 	}
-	// returns most left tree element
-	static TreeNode * treeMaximum(TreeNode * node)
-	{
-		if (node == NULL) return NULL;
-		while (node->right != NULL) node = node->right;
+	// returns the leftmost tree element
+	static TreeNode* treeMaximum(TreeNode* node) {
+		if (node == NULL)
+			return NULL;
+		while (node->right != NULL)
+			node = node->right;
 		return node;
 	}
 	// recursive delete tree
-	static void deleteTree(TreeNode* node)
-	{
-		if (node == NULL) return;
-		if (node->left != NULL) deleteTree(node->left);
-		if (node->right != NULL) deleteTree(node->right);
+	static void deleteAll(TreeNode* node) {
+		if (node == NULL)
+			return;
+		if (node->left != NULL)
+			deleteAll(node->left);
+		if (node->right != NULL)
+			deleteAll(node->right);
 		delete node;
 	}
-	static TreeNode * copyTree(TreeNode * node, TreeNode * parent)
-	{
-		if (node == NULL) return NULL;
-		TreeNode * ret = new TreeNode(node->data, parent);
-		ret->left = copyTree(node->left, ret);
-		ret->right = copyTree(node->right, ret);
+	static TreeNode* copyAll(TreeNode* node, TreeNode* parent) {
+		if (node == NULL)
+			return NULL;
+		TreeNode* ret = new TreeNode(node->data, parent);
+		ret->left = copyAll(node->left, ret);
+		ret->right = copyAll(node->right, ret);
 		return ret;
 	}
 };
@@ -178,27 +182,27 @@ protected:
 
 TreeMap::TreeMap()
 {
-	root = new TreeNode(std::make_pair(INT_MAX, "")); // sentinel
+	root = new TreeNode(std::make_pair(INT_MAX, "__SENTINEL")); // sentinel
 	detail = new TreeMapDetail();
-	detail->size = 0; // tree size ;-)
+	detail->size = 0; // size 
 };
 
 /// Content of existing TreeMap object is copied into the new object. 
-TreeMap::TreeMap( const TreeMap& m )
-{
-	///@todo Implement this
-	root = new TreeNode(std::make_pair(INT_MAX, "")); // sentinel
-	detail = new TreeMapDetail();
-	detail->size = m.detail->size; // tree size ;-)
-	root->left = TreeMapDetail::copyTree(m.root->left, root);
-};
+TreeMap::TreeMap(const TreeMap& m) {
 
-TreeMap::~TreeMap()
-{
+	root = new TreeNode(std::make_pair(INT_MAX, "__SENTINEL")); // sentinel
+	detail = new TreeMapDetail();
+	detail->size = m.detail->size; 
+	root->left = TreeMapDetail::copyAll(m.root->left, root);
+}
+;
+
+TreeMap::~TreeMap() {
 	clear();
 	delete root;
 	delete detail;
-};
+}
+;
 
 // Inserts an element into the map.
 
@@ -209,16 +213,16 @@ TreeMap::~TreeMap()
 //			 was already located.
 std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& entry)
 {
-	///@todo Finnish this ( Do what to Finland citizens? )
-	TreeNode * node = root->left;
+	///@todo Finnish this (Poor Finnish people)
+/*	TreeNode* node = root->left;
 	if (node == NULL)
 	{
 		root->left = new TreeNode(entry, root);
 		++detail->size;
 		return std::make_pair(iterator(root->left), true);
 	}
-	while (/* node != NULL && */node->data.first != entry.first )
-	{
+	while (/* node != NULL && *///node->data.first != entry.first )
+/*	{
 		if (node->data.first > entry.first)
 		{
 			if (node->left == NULL)
@@ -247,6 +251,40 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 
 	// shouldn't happen
 	//return std::make_pair(unsafe_insert(entry), true);
+*/
+	Node* crawler = root->left; // first significant node
+	Node* parent = root;
+	
+	while (crawler != NULL) {
+		parent = crawler;
+		if (crawler->data.first == entry.first) {// element already exists
+			return std::make_pair(iterator(crawler), false);
+		}
+		if (entry.first <= crawler->data.first)
+			crawler = crawler->left;
+		else 
+			crawler = crawler->right;
+	}
+	
+	Node* newNode = new TreeNode(entry, parent, NULL, NULL); 
+	
+	(detail->size)++; // increase size counter
+	
+	if (parent == root) {
+		root->left = newNode; // we only link to the left sie of root (sentinel)
+		std::cerr << "inserted " << newNode << " with Parent root" << std::endl;
+		return std::make_pair(iterator(newNode), true);
+		
+	}
+	
+	if (entry.first <= parent->data.first)
+		parent->left = newNode;
+	else
+		parent->right = newNode; // link to the proper side of parent
+	
+	std::cerr << "inserted " << newNode << " with Parent " << newNode->parent << std::endl;
+	
+	return std::make_pair(iterator(newNode), true);
 }
 
 // Inserts an element into the map.
@@ -412,7 +450,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 TreeMap::iterator TreeMap::erase(TreeMap::iterator f, TreeMap::iterator l)
 {
 	///@todo Implement this
-	assert(f.node->data.first <= l.node->data.first);
+	assert(f.node->data.first <= l.node->data.first); // sentinel (end) is INT_MAX so this assert is ok
 	while (f != l)
 	{
 		f = erase(f);
@@ -437,7 +475,7 @@ void TreeMap::clear( )
 {
 	//TreeMapDetail::erase(this, 0);  /// Stupid helper usage example
 	///@todo Implement this
-	TreeMapDetail::deleteTree(root->left);
+	TreeMapDetail::deleteAll(root->left);
 	root->left = NULL;
 	detail->size = 0;
 }
@@ -522,7 +560,7 @@ TreeMap& TreeMap::operator=(const TreeMap& another)
 {
 	///@todo Implement this
 	clear();
-	root->left = TreeMapDetail::copyTree(another.root->left, root);
+	root->left = TreeMapDetail::copyAll(another.root->left, root);
 	detail->size = another.detail->size; // tree size ;-)
 	return *this;
 }
@@ -575,12 +613,12 @@ void test()
 	   m[7] = "Kain";
 	   m[0] = "Abel";
 	   m[9] = "Moses";
-	   //m[201];m[589];m[495];m[927];m[126];m[661];m[339];m[265];m[498];m[23];m[641];m[111];m[709];m[229];m[291];m[924];m[313];m[147];m[755];m[189];m[19];m[209];m[413];m[728];m[491];m[180];m[510];m[734];m[578];m[24];m[430];m[362];m[630];m[80];m[352];m[462];m[139];m[50];m[75];m[584];m[385];m[445];m[191];m[386];m[505];m[325];m[216];m[464];m[844];m[290];m[593];m[482];m[694];m[615];m[286];m[698];m[19];m[866];m[321];m[901];m[395];m[262];m[526];m[372];m[424];m[637];m[313];m[294];m[399];m[777];m[433];m[548];m[510];m[838];m[425];m[881];m[637];m[39];m[613];m[884];m[344];m[507];m[267];m[217];m[69];m[420];m[489];m[613];m[729];m[248];m[931];m[28];m[480];m[570];m[217];m[596];m[197];m[89];m[71];m[602];m[660];m[639];m[645];m[723];m[187];m[874];m[285];m[407];m[154];m[445];m[110];m[346];m[807];m[806];m[527];m[769];m[181];m[839];m[770];m[843];   TreeMap::iterator eraseIterator = m.begin();
+	   m[201];m[589];m[495];m[927];m[126];m[661];m[339];m[265];m[498];m[23];m[641];m[111];m[709];m[229];m[291];m[924];m[313];m[147];m[755];m[189];m[19];m[209];m[413];m[728];m[491];m[180];m[510];m[734];m[578];m[24];m[430];m[362];m[630];m[80];m[352];m[462];m[139];m[50];m[75];m[584];m[385];m[445];m[191];m[386];m[505];m[325];m[216];m[464];m[844];m[290];m[593];m[482];m[694];m[615];m[286];m[698];m[19];m[866];m[321];m[901];m[395];m[262];m[526];m[372];m[424];m[637];m[313];m[294];m[399];m[777];m[433];m[548];m[510];m[838];m[425];m[881];m[637];m[39];m[613];m[884];m[344];m[507];m[267];m[217];m[69];m[420];m[489];m[613];m[729];m[248];m[931];m[28];m[480];m[570];m[217];m[596];m[197];m[89];m[71];m[602];m[660];m[639];m[645];m[723];m[187];m[874];m[285];m[407];m[154];m[445];m[110];m[346];m[807];m[806];m[527];m[769];m[181];m[839];m[770];m[843];   TreeMap::iterator eraseIterator = m.begin();
 	   
 	   for(i = m.end(); i != m.begin(); --i)
 		   std::cout << i->first << " " << i->second << std::endl;
 	   
-	   //m.erase(m.begin(), m.end());
+	   
 	   
 	   for(i = m.end(); i != m.begin(); --i)
 		   std::cout << i->first << " " << i->second << std::endl;
@@ -596,6 +634,9 @@ void test()
 	   for(i = m.begin(); i !=m.end(); i++)
 		   std::cout << i->first << " " << i->second << std::endl;
 
+	   std::cout << " beg : " <<  (m.begin())->first << " " << (m.begin())->second << std::endl;
+	   std::cout << " end : " << (m.end())->first << " " << (m.end())->second << std::endl;
+	   m.erase(m.begin(), m.end());
 }
 
 //////////////////////////////////////////////////////////////////////////////
