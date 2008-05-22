@@ -1,15 +1,22 @@
-all : asd asd_fast
+all: main main-speed
 
-asd : asd.cc
-	g++ -D _SUNOS asd.cc /home/common/dyd/aisdi/tree/main.cc /home/common/dyd/aisdi/tree/timer.cc /home/common/dyd/aisdi/testtree/ltest_tree.so -o asd 
-asd_fast : asd.cc
-	g++ -O2 -D NDEBUG -D _SUNOS asd.cc /home/common/dyd/aisdi/tree/main.cc /home/common/dyd/aisdi/tree/timer.cc /home/common/dyd/aisdi/testtree/ltest_tree.so -o asd_fast
-del :
-	rm asd
+main: asd.o main.o
+	g++ -o $@ $^
 
-debug : 
-	g++ -g -D _SUNOS asd.cc /home/common/dyd/aisdi/tree/main.cc /home/common/dyd/aisdi/tree/timer.cc /home/common/dyd/aisdi/testtree/ltest_tree.so -o asd_debug 
-	gdb asd_debug
+main-speed: asd-speed.o main-speed.o
+	g++ -o $@ $^
 
-view:
-	lynx /home/common/dyd/aisdi/tree/info/index.html
+asd.o: asd.cc TreeMap.h
+	g++ -ggdb -O0 -c -o $@ $<
+
+asd-speed.o: asd.cc TreeMap.h
+	g++ -D NDEBUG -c -O2 -o $@ $<
+
+main.o: main.cc TreeMap.h
+	g++ -D DO_TEST=1 -D DO_SPEED_TEST=0 -ggdb -O0 -c -o $@ $<
+
+main-speed.o: main.cc TreeMap.h
+	g++ -D DO_TEST=0 -D DO_SPEED_TEST=1 -D NDEBUG -O2 -c -o $@ $<
+
+clean:
+	rm -f -- main main-speed core *.o
