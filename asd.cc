@@ -103,7 +103,7 @@ protected:
 	static TreeNode * succ(TreeNode * node)
 	{
 		assert(node != NULL);
-		TreeNode * tmp = node;
+		/*TreeNode * tmp = node;
 		if (tmp->right != NULL)
 			return TreeMapDetail::treeMinimum(tmp->right);
 		TreeNode * y = tmp->parent;
@@ -112,7 +112,32 @@ protected:
 			tmp = y;
 			y = y->parent;
 		}
-		return y;
+		return y; */
+
+		if (node->parent == NULL) { // trying to ++end()
+			return node;
+		}
+
+		if (node->right != NULL) { // node has right son
+			node = node->right;
+
+			while (node->left != NULL)
+				node = node->left;
+
+			return node;
+		}
+
+		if (node == node->parent->left) { // node is left son
+			node = node->parent;
+			return node;
+		}
+
+		while (node->parent->parent != NULL && node == node->parent->right) { //Node is rright son. p->p == NULL tells root apart.  
+			node = node->parent;
+		}
+		node = node->parent;
+
+		return node;
 	}
 	// returns most right tree element
 	static TreeNode * treeMinimum(TreeNode * node)
@@ -566,6 +591,9 @@ void test()
 	   m.erase(m.begin(), iterator);
 	   
 	   for(i = m.end(); i != m.begin(); --i)
+		   std::cout << i->first << " " << i->second << std::endl;
+	   
+	   for(i = m.begin(); i !=m.end(); i++)
 		   std::cout << i->first << " " << i->second << std::endl;
 
 }
