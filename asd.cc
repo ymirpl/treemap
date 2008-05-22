@@ -606,9 +606,13 @@ void test()
 
 //	   m.erase(eraseIterator, shower);
    for( int i = 3; i < 17 ; i++) {
-	   std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
+
+	   eraseIterator = m.begin();
+	   for(int j =0; j < 17-i ; j++) {
+		   eraseIterator++; 
+	   }
+	   std::cout << "Eiter: " << eraseIterator->first  << " " << eraseIterator->second << std::endl;
 	   m.erase(eraseIterator);
-	   eraseIterator++;
    for(iterator=m.begin(); iterator != m.end(); iterator++)
 	   std::cout << iterator->first <<"   "<<iterator->second<<std::endl;
       std::cout << "Size after erase : " << m.size() << std::endl;
