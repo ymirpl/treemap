@@ -313,7 +313,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 			root->left = ret.node;
 		
 		root->right = ret.node; // new begin;
-		std::cout << "New begin is " << ret.node->data.first << " w P: " << ret.node->parent->data.second << std::endl;
+		std::cout << "Deletrig " << node->data.first << " returning: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
 		
 		delete node;
 		(root->data).first--; // decrease size
@@ -321,8 +321,12 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	}
 	
 	if (node->right == NULL && node->left == NULL) { // node is leaf
-		ret = ++i;
+		ret = i;
+		ret++;
+		
 		std::cerr<< "Lisc " <<std::endl;
+		std::cerr << "Erasing: " << node->data.first << " ret: " << ret.node->data.first <<  "  " << ret.node->data.second << std::endl;
+				
 		if (node->parent->left == node)
 			node->parent->left = NULL;
 		else
@@ -330,7 +334,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 
 		delete node;
 		(root->data).first--; // decrease size
-		std::cerr << "Erasing: " << node->data.first << " ret: " << ret.node->data.first << std::endl;
+		
 		return ret;
 	}
 	
@@ -341,6 +345,8 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		ret++;
 		
 		TreeMapDetail::swap(i.node, ret.node );
+		std::cerr << "Erasing: " << node->data.first << " ret: " << ret.node->data.first <<  "  " << ret.node->data.second << std::endl;
+		
 		erase(i); // proper erase
 		return ret;
 		
@@ -416,7 +422,8 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	
 	if (node->right != NULL) { // one right subtree
 		std::cerr<< "jeden prawy" <<std::endl;
-		ret = ++i; // we return node after delted
+		ret = i; // we return node after delted
+		ret++;
 		
 		// we're linking "over" deleted node
 		if (node->parent->right == node)
@@ -426,15 +433,17 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 
 		node->right->parent = node->parent;
 		
+		
+		std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
+
 		delete node;
 		(root->data).first--; // decrease size
-		
-		std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << std::endl;
 
 		return ret;
 	} else { // node has one left subtree
 		std::cerr<< "jeden lewy" <<std::endl;
-		 ret = ++i;
+		 ret = i;
+		 ret++;
 		
 		 // linking "over" delted node 
 		if (node->parent->right == node)
@@ -443,11 +452,12 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 			node->parent->left = node->left;
 
 		node->left->parent = node->parent;
+		std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << "  " << ret.node->data.second << std::endl;
+
 		
 		delete node;
 		(root->data).first--; // decrease size
-		std::cerr << "Erasing: " << i.node->data.first << " ret: " << ret.node->data.first << std::endl;
-
+	
 		return ret;
 
 	}
@@ -660,29 +670,37 @@ void test()
    m.draw();
    
    TreeMap::iterator eraseIterator = m.begin();
+   
    eraseIterator++;
-
    std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
-   m.erase(eraseIterator);
+   TreeMap::iterator ender = eraseIterator;
+   ender++;ender++;
+   std::cout << "Eiter: " << eraseIterator->first  <<std::endl;
+   std::cout << "Ender: " << ender->first  <<std::endl;
+         
+   m.erase(eraseIterator, ender);
    m.draw();
+   std::cout << "Size after erase : " << m.size() << std::endl;
+   
+   
 
 
 //	   m.erase(eraseIterator, shower);
-   for( int i = 3; i < 17 ; i++) {
+  /* for( int i = 3; i < 17 ; i++) {
 
 	   //eraseIterator = m.begin();
 	   //for(int j =0; j < 17-i ; j++ {
 	   eraseIterator++;
 	   //}
-	   std::cout << "Eiter: " << eraseIterator->first  << " " << eraseIterator->second << std::endl;
-	   m.erase(eraseIterator);
+	  std::cout << "Eiter: " << eraseIterator->first  << " " << eraseIterator->second << std::endl;
+	 m.erase(eraseIterator);
 	   m.draw();
-	   std::cout << "Size after erase : " << m.size() << std::endl;
+	  std::cout << "Size after erase : " << m.size() << std::endl;
       
 
 		   
-	  }
-    
+	 }
+    */
 
    //for_each(m.begin(), m.end(), print );
    //system("PAUSE");
