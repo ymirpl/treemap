@@ -45,7 +45,7 @@ class TreeMapDetail //Helper
 protected:
 	friend class TreeMap;
 	friend class TreeMap::const_iterator;
-	unsigned int size; // rozmiar drzewa (max 4 294 967 295)
+	unsigned int size; // TreeSize
 
 	/// Stupid example of a method that modifies a protected field in 
 	/// the TreeMap class. Feel free to remove this method or add new
@@ -68,19 +68,36 @@ protected:
 		return node;
 	}
 	// returns next element in inorder traverse
-	static TreeNode * pred(TreeNode * node)
-	{
+	static TreeNode * pred(TreeNode * node) {
 		assert(node != NULL);
-		TreeNode * tmp = node;
-		if (tmp -> left != NULL)
-			return TreeMapDetail::treeMaximum(tmp->left);
-		TreeNode * y = tmp->parent;
-		while (y != NULL && tmp == y->left)
-		{
-			tmp = y;
-			y = y->parent;
+		/*	TreeNode * tmp = node;
+		 if (tmp -> left != NULL)
+		 return TreeMapDetail::treeMaximum(tmp->left);
+		 TreeNode * y = tmp->parent;
+		 while (y != NULL && tmp == y->left)
+		 {
+		 tmp = y;
+		 y = y->parent;
+		 }
+		 return y; */
+		if (node->left != NULL) {// node has left son. Seek for the rightmost son of left subtree
+			node = node->left;
+			while (node->right != NULL)
+				node = node->right;
+			return node;
 		}
-		return y;
+
+		if (node == node->parent->right) { // node is right son. Return parent
+			node = node->parent;
+			return node;
+		}
+
+		while (node->parent->parent != NULL && node == node->parent->left)
+			// node is left son
+			node = node->parent;
+		node = node->parent;
+
+		return node;
 	}
 	// returns next element in inorder traverse
 	static TreeNode * succ(TreeNode * node)
