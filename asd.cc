@@ -134,7 +134,7 @@ std::pair<TreeMap::iterator, bool> TreeMap::insert(const std::pair<Key, Val>& en
 	while (crawler != NULL) {
 		parent = crawler;
 		if (crawler->data.first == entry.first) {// element already exists
-			std::cerr << "Exists " << crawler << " with parent " << crawler->parent << " w lc : " << crawler->left << " w rc: " << crawler->right << std::endl;
+			std::cerr << "Insert Exists " << crawler << " with parent " << crawler->parent << " w lc : " << crawler->left << " w rc: " << crawler->right << std::endl;
 			return std::make_pair(iterator(crawler), false);
 		}
 		if (entry.first < crawler->data.first)
@@ -224,11 +224,13 @@ TreeMap::iterator TreeMap::unsafe_insert(const std::pair<Key, Val>& entry)
 TreeMap::iterator TreeMap::find(const Key& k) {
 	Node* crawler = root->left; // first significant node
 	Node* parent = root;
+	
+	std::cout << "find given jkey : " << k << std::endl;
 
 	while (crawler != NULL) {
 		parent = crawler;
 		if (crawler->data.first == k) {// element exists
-			std::cerr << "Exists " << crawler << " with parent "
+			std::cerr << " find Exists " << crawler->data.first << " with parent "
 					<< crawler->parent << " w lc : " << crawler->left
 					<< " w rc: " << crawler->right << std::endl;
 			return iterator(crawler);
@@ -249,7 +251,7 @@ TreeMap::const_iterator TreeMap::find(const Key& k) const {
 	while (crawler != NULL) {
 		parent = crawler;
 		if (crawler->data.first == k) {// element exists
-			std::cerr << "Exists " << crawler << " with parent "
+			std::cerr << "cons_find Exists " << crawler << " with parent "
 					<< crawler->parent << " w lc : " << crawler->left
 					<< " w rc: " << crawler->right << std::endl;
 			return const_iterator(crawler);
@@ -293,6 +295,8 @@ TreeMap::size_type TreeMap::count(const Key& _Key) const {
 // @returns The iterator that designates the first element remaining beyond any elements removed.
 TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 {
+	
+	assert(i!=begin());
 	   if (i.node == root) // can't delete sentinel
 		return end();
 	   
@@ -316,10 +320,13 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 	
 	if (node->right!=NULL && node->left != NULL) { // node has two subtrees
 		std::cerr<< "Dwa poddrze swap" <<std::endl;
-		TreeMap::iterator sec = i;
-		sec++;
-		TreeMapDetail::swap(i.node, sec.node );
-		return i;
+		
+		TreeMap::iterator ret = i;
+		ret++;
+		
+		TreeMapDetail::swap(i.node, ret.node );
+		erase(i); // proper erase
+		return ret;
 		
 
 /*		tmp = (++i).node; // tmp is i's next
@@ -419,7 +426,7 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator i)
 		else
 			node->parent->left = node->left;
 
-		node->left->parent = node->parent;\
+		node->left->parent = node->parent;
 		
 		delete node;
 		(root->data).first--; // decrease size
@@ -449,12 +456,15 @@ TreeMap::iterator TreeMap::erase(TreeMap::iterator f, TreeMap::iterator l) {
 //          Since this is not a multimap itshould be 1 or 0.
 TreeMap::size_type TreeMap::erase(const Key& key)
 {
+	std::cout << "Given key: " << key << std::endl;
 	TreeMap::iterator iter;
-	Node* node = root;
-	iter = iterator(node);
-	iter--;
-	std::cerr << iter->second << std::endl;
-   return 0;
+	iter = find(key);
+	std::cout << "Iter sec: " << iter->second << std::endl;
+	if(iter != end())  {// no such key
+		erase(iter);
+		return 1;
+	}
+	return 0;
 }
 
 // Erases all the elements of a map.
@@ -653,7 +663,9 @@ void test()
 	   m.draw();
 	   std::cout << "Size after erase : " << m.size() << std::endl;
       
-   }
+
+		   
+	  }
     
 
    //for_each(m.begin(), m.end(), print );
